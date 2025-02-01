@@ -183,24 +183,31 @@ public class HeliumHelperMod : BloonsTD6Mod
 
     public override void OnTowerUpgraded(Tower tower, string upgradeName, TowerModel newBaseTowerModel)
     {
-        if (upgradeName == ModContent.UpgradeID<Level16>())
+        if(tower.towerModel.baseId != ModContent.TowerID<Wendell>())
+        {
+            return;
+        }
+
+        int level = tower.towerModel.tiers[0];
+
+        if (level == 16)
         {
             WhitelistedBloons.Add("Ddt");
         }
-        else if (upgradeName == ModContent.UpgradeID<Level5>())
+        if (level >= 5)
         {
             AutoSend = true;
             AutoSendSpeed = 2;
         }
-        else if (upgradeName == ModContent.UpgradeID<Level13>())
+        if (level >= 13)
         {
             AutoSendSpeed = 1;
         }
-        else if (upgradeName == ModContent.UpgradeID<Level17>())
+        if (level >= 17)
         {
             AutoSendSpeed = .5f;
         }
-        else if (upgradeName == ModContent.UpgradeID<Level20>())
+        if (level >= 20)
         {
             AutoSendSpeed = .1f;
         }
@@ -210,12 +217,18 @@ public class HeliumHelperMod : BloonsTD6Mod
     {
         WendellBloons.Clear();
         WhitelistedBloons.Clear();
+        AutoSend = false;
+        AutoSendSpeed = 2;
+        WendellBloonsMenu.autoSendEnabled = false;
     }
 
     public override void OnRestart()
     {
         WendellBloons.Clear();
         WhitelistedBloons.Clear();
+        AutoSend = false;
+        AutoSendSpeed = 2;
+        WendellBloonsMenu.autoSendEnabled = false;
     }
     #endregion
 
