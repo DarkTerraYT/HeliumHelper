@@ -98,6 +98,10 @@ namespace HeliumHelper.UI
 
             iconImage = button.AddImage(new("Icon", 300), icon.AssetGUID);
 
+            if (!HeliumHelperMod.WendellBloons.ContainsKey(bloonId))
+            {
+                return;
+            }
             countText = button.AddText(new("Count", 0, -125f, 325, 80), HeliumHelperMod.WendellBloons[bloonId].ToString());
             countText.Text.enableAutoSizing = true;
             countText.Text.fontSizeMax = 75;
@@ -177,6 +181,14 @@ namespace HeliumHelper.UI
         public class BloonSpawnDisplay(string bloon) : ModDisplay
         {
             public override string BaseDisplay => GetBloonDisplay(bloon);
+        }
+
+        void Update()
+        {
+            if(!HeliumHelperMod.WendellBloons.ContainsKey(bloonId))
+            {
+                gameObject.Destroy();
+            }
         }
 
         public static SpawnBloonButton Create(string bloonId)

@@ -88,10 +88,8 @@ public class HeliumHelperMod : BloonsTD6Mod
 
             if (projectile.projectileModel.id == "Wendell_Befriend")
             {
-                if (__instance.bloonModel.layerNumber <= projectile.projectileModel.GetDamageModel().damage)
+                if (__instance.bloonModel.layerNumber <= projectile.projectileModel.GetDamageModel().damage && !__instance.bloonModel.isBoss)
                 {
-                    ModHelper.Msg<HeliumHelperMod>($"{__instance.bloonModel.id} Layer #: {__instance.bloonModel.layerNumber}, Damage: {projectile.projectileModel.GetDamageModel().damage}");
-
                     ModContent.GetInstance<Wendell>().OnBefriend(tower, __instance);
                     totalAmount = 1999999999;
                     createEffect = false;
@@ -155,7 +153,7 @@ public class HeliumHelperMod : BloonsTD6Mod
                     bloons.Add(Game.instance.model.bloonsByName[id]);
                 }
 
-                string bloon = bloons.OrderBy(bm => bm.maxHealth).ToList()[bloons.Count - 1].id;
+                string bloon = bloons.OrderBy(bm => bm.danger).ToList()[bloons.Count - 1].id;
 
                 SpawnBloonButton.SpawnProjectile(bloon);
 
@@ -185,8 +183,6 @@ public class HeliumHelperMod : BloonsTD6Mod
 
     public override void OnTowerUpgraded(Tower tower, string upgradeName, TowerModel newBaseTowerModel)
     {
-        LoggerInstance.Msg(System.ConsoleColor.Green, upgradeName);
-
         if (upgradeName == ModContent.UpgradeID<Level16>())
         {
             WhitelistedBloons.Add("Ddt");
@@ -235,29 +231,8 @@ public class HeliumHelperMod : BloonsTD6Mod
         [HarmonyPostfix]
         public static void Postfix(MapSaveDataModel mapData)
         {
-            if (mapData.metaData.TryGetValue(WendellBloonsID, out var data))
-            {
-                WendellBloons = JsonConvert.DeserializeObject<Dictionary<string, int>>(data)!;
-            }
-            if(mapData.metaData.TryGetValue(AutoSendID, out data))
-            {
-                AutoSend = JsonConvert.DeserializeObject<bool>(data)!;
-            }
-            if (mapData.metaData.TryGetValue(AutoSendSpeedID, out data))
-            {
-                AutoSendSpeed = JsonConvert.DeserializeObject<float>(data)!;
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(Map), nameof(Map.SetSaveData))]
-    static class Map_SetSaveData
-    {
-        [HarmonyPostfix]
-        public static void Postfix(MapSaveDataModel mapData)
-        {
             var json = JsonConvert.SerializeObject(WendellBloons);
-            if(!mapData.metaData.TryAdd(WendellBloonsID, json))
+            if (!mapData.metaData.TryAdd(WendellBloonsID, json))
             {
                 mapData.metaData[WendellBloonsID] = json;
             }
@@ -270,6 +245,27 @@ public class HeliumHelperMod : BloonsTD6Mod
             if (!mapData.metaData.TryAdd(AutoSendSpeedID, json))
             {
                 mapData.metaData[AutoSendSpeedID] = json;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Map), nameof(Map.SetSaveData))]
+    static class Map_SetSaveData
+    {
+        [HarmonyPostfix]
+        public static void Postfix(MapSaveDataModel mapData)
+        {
+            if (mapData.metaData.TryGetValue(WendellBloonsID, out var data))
+            {
+                WendellBloons = JsonConvert.DeserializeObject<Dictionary<string, int>>(data)!;
+            }
+            if (mapData.metaData.TryGetValue(AutoSendID, out data))
+            {
+                AutoSend = JsonConvert.DeserializeObject<bool>(data)!;
+            }
+            if (mapData.metaData.TryGetValue(AutoSendSpeedID, out data))
+            {
+                AutoSendSpeed = JsonConvert.DeserializeObject<float>(data)!;
             }
         }
     }
