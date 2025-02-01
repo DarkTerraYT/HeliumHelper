@@ -90,6 +90,8 @@ public class HeliumHelperMod : BloonsTD6Mod
             {
                 if (__instance.bloonModel.layerNumber <= projectile.projectileModel.GetDamageModel().damage)
                 {
+                    ModHelper.Msg<HeliumHelperMod>($"{__instance.bloonModel.id} Layer #: {__instance.bloonModel.layerNumber}, Damage: {projectile.projectileModel.GetDamageModel().damage}");
+
                     ModContent.GetInstance<Wendell>().OnBefriend(tower, __instance);
                     totalAmount = 1999999999;
                     createEffect = false;

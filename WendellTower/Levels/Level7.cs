@@ -7,7 +7,7 @@ namespace HeliumHelper.WendellTower.Levels
     {
         public override int Level => 7;
 
-        public override string Description => "Wendell befriends bloons every 4 seconds instead of every 7 seconds, and can befriend black/white/purple bloons. All bloons can now hit camo.";
+        public override string Description => "Wendell befriends bloons 43% faster (7s -> 4s), and can befriend black/white/purple bloons. All bloons can now hit camo.";
 
         public override void ApplyUpgrade(TowerModel towerModel)
         {

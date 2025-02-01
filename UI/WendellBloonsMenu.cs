@@ -169,7 +169,7 @@ namespace HeliumHelper.UI
             }
 
 
-            var addAllBloons = instance.mainPanel.AddButton(new("AddAllBloonsBtn", 740, 725, 150), VanillaSprites.AddMoreBtn, new Action(() => 
+            var addAllBloons = instance.mainPanel.AddButton(new("AddAllBloonsBtn", -740, 725, 150), VanillaSprites.AddMoreBtn, new Action(() => 
             {
                 foreach(var id in InGame.instance.GetGameModel().bloonsByName.Keys)
                 {

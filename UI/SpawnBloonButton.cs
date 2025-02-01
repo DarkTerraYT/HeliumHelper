@@ -119,7 +119,7 @@ namespace HeliumHelper.UI
             }
             if (bloon.Contains(ModContent.BloonID<MoneyMoab>()))
             {
-                model.AddBehavior<IncreaseBloonWorthModel>(new("IncreaseBloonWorthModel_", "MoneyMoab", 1, 10, null, 1, "", new("MoneyMoab", 1, 10, "")));
+                model.AddBehavior<IncreaseBloonWorthModel>(new("IncreaseBloonWorthModel_", "MoneyMoab", 1, 20, null, 1, "", new("MoneyMoab", 1, 20, "")));
             }
         }
 

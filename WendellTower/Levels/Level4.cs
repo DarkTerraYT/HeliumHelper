@@ -12,13 +12,13 @@ namespace HeliumHelper.WendellTower.Levels
     {
         public override int Level => 4;
 
-        public override string Description => "Wendell can now befriend yellow bloons. He also tames them 1 second faster.";
+        public override string Description => "Wendell can now befriend yellow bloons. He also tames them 12.5% times faster (8s -> 7s).";
 
         public override void ApplyUpgrade(TowerModel towerModel)
         {
             IncreaseDamage(1, towerModel);
 
-            towerModel.GetWeapon().rate -= 1;
+            towerModel.GetWeapon().rate = 7;
         }
     }
 }

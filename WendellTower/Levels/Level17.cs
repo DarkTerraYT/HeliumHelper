@@ -12,7 +12,7 @@ namespace HeliumHelper.WendellTower.Levels
     {
         public override int Level => 17;
 
-        public override string Description => "Wendell befriends MOAB-Class bloons 16.7% times faster (30s -> 25s)";
+        public override string Description => "Wendell befriends MOAB-Class bloons 16.7% times faster (30s -> 25s). Keep bloon chance increased to 1/5.";
 
         public override void ApplyUpgrade(TowerModel towerModel)
         {

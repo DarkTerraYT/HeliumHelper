@@ -62,8 +62,8 @@ namespace HeliumHelper.WendellTower
 
             var proj = towerModel.GetWeapon().projectile;
 
-            proj.GetDamageModel().damage = 99;
-            proj.GetDamageModel().maxDamage = 99;
+            proj.GetDamageModel().damage = 3;
+            proj.GetDamageModel().maxDamage = 3;
             proj.id = "Wendell_Befriend";
 
             proj.display = new("");
