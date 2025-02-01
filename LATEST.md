@@ -1,1 +1,1 @@
-When you push a tag to GitHub, the contents of this file will become your release message
+Release of the mod jam version of this mod

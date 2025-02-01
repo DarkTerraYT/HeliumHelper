@@ -6,7 +6,7 @@
 BloonXMonkey
 </h1>
 
-Adds a support tower that uses the bloons.\n\n
+Adds Wendell, a support tower that has befriended the bloons.
 
 <b>Made for the 1330 Mod Jam with the theme "Unity"</b>
 
