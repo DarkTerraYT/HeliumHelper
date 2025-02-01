@@ -30,18 +30,14 @@ namespace HeliumHelper.UI
             [HarmonyPostfix]
             public static void Postfix(Projectile __instance)
             {
-                if(__instance.projectileModel.id.Contains("BloonSpawn"))
+                if (__instance.projectileModel.id.Contains("BloonSpawn"))
                 {
                     Random rand = new Random();
                     float num = (float)rand.NextDouble();
+                    var bloonId = __instance.projectileModel.id.Split('_')[1];
 
-                    if (num <= HeliumHelperMod.KeepBloonChance)
-                    {
-                        var bloonId = __instance.projectileModel.id.Split('_')[1];
-
-                        HeliumHelperMod.WendellBloons.TryAdd(bloonId, 0);
-                        HeliumHelperMod.WendellBloons[bloonId] += 1;
-                    }
+                    HeliumHelperMod.WendellBloons.TryAdd(bloonId, 0);
+                    HeliumHelperMod.WendellBloons[bloonId] += 1;
                 }
             }
         }
@@ -151,7 +147,7 @@ namespace HeliumHelper.UI
             return model;
         }
 
-        static void SpawnProjectile(string bloon)
+        public static void SpawnProjectile(string bloon)
         {
             var model = BloonProjectile(bloon);
 

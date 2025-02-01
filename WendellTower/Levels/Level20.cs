@@ -12,7 +12,7 @@ namespace HeliumHelper.WendellTower.Levels
     {
         public override int Level => 20;
 
-        public override string Description => "Treaty now befriends all bloons BFB and under. Wendell befriends moabs 20% faster (25s -> 20s)";
+        public override string Description => "Treaty now befriends all bloons BFB and under. Wendell befriends moabs 20% faster (25s -> 20s), and auto send is now every .1s.";
 
         public override void ApplyUpgrade(TowerModel towerModel)
         {

@@ -18,12 +18,12 @@ using Il2CppAssets.Scripts.Unity.Bridge;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu;
 using Il2CppAssets.Scripts.Simulation.Towers.Projectiles;
 using Il2CppAssets.Scripts.Simulation.Towers;
-using Il2CppAssets.Scripts.Models;
 using Il2CppAssets.Scripts.Simulation.Track;
-using MelonLoader.Utils;
-using Il2CppAssets.Scripts.Simulation.Towers.Behaviors;
 using Il2CppAssets.Scripts.Models.Towers;
 using HeliumHelper.WendellTower.Levels;
+using Il2CppAssets.Scripts.Models.Bloons;
+using System.Linq;
+using UnityEngine;
 
 [assembly: MelonInfo(typeof(HeliumHelper.HeliumHelperMod), ModHelperData.Name, ModHelperData.Version, ModHelperData.RepoOwner)]
 [assembly: MelonGame("Ninja Kiwi", "BloonsTD6")]
@@ -32,15 +32,15 @@ namespace HeliumHelper;
 
 public class HeliumHelperMod : BloonsTD6Mod
 {
-    public static float KeepBloonChance = 0.00f;
-
     public static List<string> WhitelistedBloons = [];
+
+    public static bool AutoSend = true;
+
+    public static float AutoSendSpeed = 2;
 
     #region Common Methods and Patches
     public static void BefriendBloon(string id, bool updateMenu = false)
     {
-        KeepBloonChance = 0;
-
         WendellBloons.TryAdd(id, 0);
         WendellBloons[id] += 1;
 
@@ -140,6 +140,34 @@ public class HeliumHelperMod : BloonsTD6Mod
     }
     #endregion
     #region Hooks
+    public override void OnLateUpdate()
+    {
+        if (InGame.instance != null && InGame.instance.bridge != null && InGame.instance.GetTowers().Any(twr => twr.towerModel.baseId == ModContent.TowerID<Wendell>()))
+        {
+            if (WendellBloonsMenu.autoSendEnabled && WendellBloonsMenu.nextAutoSendTime <= Time.time && WendellBloons.Count > 0)
+            {
+                WendellBloonsMenu.nextAutoSendTime = Time.time + AutoSendSpeed;
+
+                List<BloonModel> bloons = [];
+
+                foreach (var id in WendellBloons.Keys)
+                {
+                    bloons.Add(Game.instance.model.bloonsByName[id]);
+                }
+
+                string bloon = bloons.OrderBy(bm => bm.maxHealth).ToList()[bloons.Count - 1].id;
+
+                SpawnBloonButton.SpawnProjectile(bloon);
+
+                WendellBloons[bloon] -= 1;
+                if (WendellBloons[bloon] <= 0)
+                {
+                    WendellBloons.Remove(bloon);
+                }
+            }
+        }
+    }
+
     public override void OnWeaponFire(Weapon weapon)
     {
         var tower = weapon.attack.tower;
@@ -157,9 +185,28 @@ public class HeliumHelperMod : BloonsTD6Mod
 
     public override void OnTowerUpgraded(Tower tower, string upgradeName, TowerModel newBaseTowerModel)
     {
-        if(upgradeName == ModContent.UpgradeID<Level16>())
+        LoggerInstance.Msg(System.ConsoleColor.Green, upgradeName);
+
+        if (upgradeName == ModContent.UpgradeID<Level16>())
         {
             WhitelistedBloons.Add("Ddt");
+        }
+        else if (upgradeName == ModContent.UpgradeID<Level5>())
+        {
+            AutoSend = true;
+            AutoSendSpeed = 2;
+        }
+        else if (upgradeName == ModContent.UpgradeID<Level13>())
+        {
+            AutoSendSpeed = 1;
+        }
+        else if (upgradeName == ModContent.UpgradeID<Level17>())
+        {
+            AutoSendSpeed = .5f;
+        }
+        else if (upgradeName == ModContent.UpgradeID<Level20>())
+        {
+            AutoSendSpeed = .1f;
         }
     }
 
@@ -179,6 +226,8 @@ public class HeliumHelperMod : BloonsTD6Mod
     #region Saving
     public const string WendellBloonsID = "WendellBloons";
     public static Dictionary<string, int> WendellBloons = [];
+    public const string AutoSendID = "WendellAutoSendBloons";
+    public const string AutoSendSpeedID = "WendellAutoSendBloonsSpeed";
 
     [HarmonyPatch(typeof(Map), nameof(Map.GetSaveData))]
     static class Map_GetSaveData
@@ -190,6 +239,14 @@ public class HeliumHelperMod : BloonsTD6Mod
             {
                 WendellBloons = JsonConvert.DeserializeObject<Dictionary<string, int>>(data)!;
             }
+            if(mapData.metaData.TryGetValue(AutoSendID, out data))
+            {
+                AutoSend = JsonConvert.DeserializeObject<bool>(data)!;
+            }
+            if (mapData.metaData.TryGetValue(AutoSendSpeedID, out data))
+            {
+                AutoSendSpeed = JsonConvert.DeserializeObject<float>(data)!;
+            }
         }
     }
 
@@ -200,8 +257,20 @@ public class HeliumHelperMod : BloonsTD6Mod
         public static void Postfix(MapSaveDataModel mapData)
         {
             var json = JsonConvert.SerializeObject(WendellBloons);
-            mapData.metaData[WendellBloonsID] = json;
-
+            if(!mapData.metaData.TryAdd(WendellBloonsID, json))
+            {
+                mapData.metaData[WendellBloonsID] = json;
+            }
+            json = JsonConvert.SerializeObject(AutoSend);
+            if (!mapData.metaData.TryAdd(AutoSendID, json))
+            {
+                mapData.metaData[AutoSendID] = json;
+            }
+            json = JsonConvert.SerializeObject(AutoSendSpeed);
+            if (!mapData.metaData.TryAdd(AutoSendSpeedID, json))
+            {
+                mapData.metaData[AutoSendSpeedID] = json;
+            }
         }
     }
     #endregion

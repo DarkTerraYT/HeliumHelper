@@ -1,6 +1,8 @@
 ﻿using BTD_Mod_Helper.Extensions;
 using Il2CppAssets.Scripts.Models.Towers;
 using Il2CppAssets.Scripts.Models.Towers.Behaviors.Abilities;
+using Il2CppAssets.Scripts.Models.Towers.Behaviors.Abilities.Behaviors;
+using Il2CppAssets.Scripts.Unity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,9 +19,28 @@ namespace HeliumHelper.WendellTower.Levels
 
         public override string Description => $"Ability, {AbilityDescription}";
 
+
+        AbilityModel abilityModel()
+        {
+            AbilityModel ability = Game.instance.model.GetTowerFromId("MortarMonkey-040").GetAbility().Duplicate();
+            ability.behaviors = null;
+
+            ability.cooldown = 75;
+
+            ability.name = "AbilityModel_Treaty_Lvl10";
+            ability.description = AbilityDescription;
+            ability.displayName = "Treaty";
+
+            ability.icon = GetSpriteReference("TreatyAA");
+            ability.addedViaUpgrade = Id;
+
+
+            return ability;
+        }
+
         public override void ApplyUpgrade(TowerModel towerModel)
         {
-            towerModel.AddBehavior(new AbilityModel("AbilityModel_Treaty_Lvl10", "Treaty", AbilityDescription, 0, 0, GetSpriteReference("TreatyAA"), 75, new([]), false, false, Id, 1, 0, 999999, false, false));
+            towerModel.AddBehavior(abilityModel());
         }
     }
 }

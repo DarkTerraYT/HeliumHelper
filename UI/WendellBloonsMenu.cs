@@ -1,29 +1,21 @@
-﻿using BTD_Mod_Helper;
+﻿using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Enums;
 using BTD_Mod_Helper.Extensions;
-using Il2CppAssets.Scripts.Models.Towers.Projectiles.Behaviors;
-using Il2CppAssets.Scripts.Models.Towers.Projectiles;
+using HarmonyLib;
+using HeliumHelper.WendellTower;
+using Il2CppAssets.Scripts.Models.Bloons;
 using Il2CppAssets.Scripts.Unity;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
+using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu;
+using Il2CppInterop.Runtime.Attributes;
 using MelonLoader;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using Il2CppAssets.Scripts.Simulation.Towers.Projectiles;
-using Il2CppAssets.Scripts.Simulation.Towers.Projectiles.Behaviors;
-using Il2CppAssets.Scripts.Simulation.Track;
-using BTD_Mod_Helper.Api;
-using HeliumHelper.WendellTower;
-using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu;
-using System.Threading.Tasks;
-using System.Collections;
-using Il2CppAssets.Scripts.Unity.Achievements.List;
-using Il2CppAssets.Scripts.Unity.UI_New.Knowledge;
-using HarmonyLib;
-using Il2CppInterop.Runtime.Attributes;
 
 namespace HeliumHelper.UI
 {
@@ -34,7 +26,11 @@ namespace HeliumHelper.UI
 
         public GridLayoutGroup layoutGroup;
 
+        public static bool autoSendEnabled = false;
+
         public ModHelperPanel mainPanel;
+
+        public ModHelperButton autoSendBtn;
 
         internal object updateToken;
 
@@ -45,20 +41,9 @@ namespace HeliumHelper.UI
 
         MatchLocalPosition matchLocalPosition;
 
-        bool readyForUpdate = false;
+        public static float nextAutoSendTime = 0;
 
-        [HarmonyPatch(typeof(TowerSelectionMenu), nameof(TowerSelectionMenu.DeselectTower))]
-        static class TSM_Deselect
-        {
-            [HarmonyPostfix]
-            public static void Postfix()
-            {
-                if (instance != null)
-                {
-                    instance.gameObject.SetActive(false);
-                }
-            }
-        }
+        bool readyForUpdate = false;
 
         public void Close()
         {
@@ -104,16 +89,43 @@ namespace HeliumHelper.UI
                 return;
             }
 
+            if(!InGame.instance.GetTowers().Any(twr => twr.towerModel.baseId == ModContent.TowerID<Wendell>()))
+            {
+                Close();
+            }
+
             if (tsm.selectedTower != null)
             {
                 if (tsm.selectedTower.tower.towerModel.baseId == ModContent.TowerID<Wendell>())
                 {
+                    gameObject.Show();
+
+                    if (tsm.selectedTower.tower.towerModel.tiers[0] >= 5)
+                    {
+                        autoSendBtn.SetActive(true);
+
+                        string btnGuid = VanillaSprites.GreenBtn;
+                        if (!autoSendEnabled)
+                        {
+                            btnGuid = VanillaSprites.RedBtn;
+                        }
+
+                        autoSendBtn.Image.SetSprite(btnGuid);
+                    }
+                    else
+                    {
+                        autoSendBtn.SetActive(false);
+                    }
                     matchLocalPosition.offset.x = instance.tsm.IsOpenedRight() ? -1465 : 2065;
                 }
                 else
                 {
                     Close();
                 }
+            }
+            else
+            {
+                gameObject.Hide();
             }
         }
 
@@ -169,7 +181,7 @@ namespace HeliumHelper.UI
             }
 
 
-            var addAllBloons = instance.mainPanel.AddButton(new("AddAllBloonsBtn", -740, 725, 150), VanillaSprites.AddMoreBtn, new Action(() => 
+            var addAllBloons = instance.mainPanel.AddButton(new("AddAllBloonsBtn", -740, 575, 150), VanillaSprites.AddMoreBtn, new Action(() => 
             {
                 foreach(var id in InGame.instance.GetGameModel().bloonsByName.Keys)
                 {
@@ -189,6 +201,10 @@ namespace HeliumHelper.UI
             {
                 addAllBloons.gameObject.SetActive(false);
             }
+
+            instance.autoSendBtn = instance.mainPanel.AddButton(new("AddAllBloonsBtn", -740, 725, 150), VanillaSprites.RedBtn, new Action(() => autoSendEnabled = !autoSendEnabled));
+
+            instance.autoSendBtn.AddImage(new("Icon", 125), VanillaSprites.RaceIcon);
 
             instance.readyForUpdate = true;
 

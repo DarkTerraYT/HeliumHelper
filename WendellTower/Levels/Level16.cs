@@ -13,7 +13,7 @@ namespace HeliumHelper.WendellTower.Levels
     {
         public override int Level => 16;
 
-        public override string Description => "Wendell can befriend BFBs and DDTs";
+        public override string Description => "Wendell can befriend BFBs";
 
         public override void ApplyUpgrade(TowerModel towerModel)
         {

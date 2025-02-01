@@ -13,7 +13,7 @@ namespace HeliumHelper.WendellTower.Levels
     {
         public override int Level => 13;
 
-        public override string Description => "Chance of keeping bloons increased to 1/10. Referral lasts twice as long.";
+        public override string Description => "Auto send speed now 1s. Referral lasts twice as long.";
 
         public override void ApplyUpgrade(TowerModel towerModel)
         {

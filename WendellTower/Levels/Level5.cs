@@ -14,27 +14,11 @@ namespace HeliumHelper.WendellTower.Levels
     {
         public override int Level => 5;
 
-        public override string Description => "Befriended bloons have a 1/20 chance of returning after they finish fighting if they were not popped. Range is also increased.";
+        public override string Description => "Wendell sends out your best bloon every 2 seconds (toggleable in bloons menu). Range is also increased.";
 
         public override void ApplyUpgrade(TowerModel towerModel)
         {
             towerModel.IncreaseRange(5);
-        }
-
-        public override void OnBefriend(Tower wendell, Bloon bloon, int currentLevel)
-        {
-            switch (currentLevel)
-            {
-                case <13:
-                    HeliumHelperMod.KeepBloonChance = 1 / 20f;
-                    break;
-                case < 17:
-                    HeliumHelperMod.KeepBloonChance = 1 / 10f;
-                    break;
-                case >= 17:
-                    HeliumHelperMod.KeepBloonChance = 1 / 5f;
-                    break;
-            }
         }
     }
 }
