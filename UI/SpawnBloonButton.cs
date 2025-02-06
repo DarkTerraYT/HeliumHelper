@@ -76,7 +76,6 @@ namespace HeliumHelper.UI
 
         void onClick()
         {
-
             SpawnProjectile(bloonId);
 
             HeliumHelperMod.WendellBloons[bloonId] -= 1;
@@ -115,11 +114,11 @@ namespace HeliumHelper.UI
 
             if (bloon.Contains(ModContent.BloonID<MoneyBloon>())) 
             {
-                model.AddBehavior<IncreaseBloonWorthModel>(new("IncreaseBloonWorthModel_", "MoneyBloon", 1, 1, null, 1, "", new("MoneyBloon", 1, 1, "")));
+                model.AddBehavior<IncreaseBloonWorthModel>(new("IncreaseBloonWorthModel_", "MoneyBloon", 1, 1, null, 1, "", 9999999, Il2Cpp.BloonProperties.None,  new("MoneyBloon", 1, 1, "", Il2Cpp.BloonProperties.None)));
             }
             if (bloon.Contains(ModContent.BloonID<MoneyMoab>()))
             {
-                model.AddBehavior<IncreaseBloonWorthModel>(new("IncreaseBloonWorthModel_", "MoneyMoab", 1, 20, null, 1, "", new("MoneyMoab", 1, 20, "")));
+                model.AddBehavior<IncreaseBloonWorthModel>(new("IncreaseBloonWorthModel_", "MoneyBloon", 10, 1, null, 1, "", 9999999, Il2Cpp.BloonProperties.None, new("MoneyBloon", 1, 10, "", Il2Cpp.BloonProperties.None)));
             }
         }
 

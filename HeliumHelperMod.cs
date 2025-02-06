@@ -20,7 +20,6 @@ using Il2CppAssets.Scripts.Simulation.Towers.Projectiles;
 using Il2CppAssets.Scripts.Simulation.Towers;
 using Il2CppAssets.Scripts.Simulation.Track;
 using Il2CppAssets.Scripts.Models.Towers;
-using HeliumHelper.WendellTower.Levels;
 using Il2CppAssets.Scripts.Models.Bloons;
 using System.Linq;
 using UnityEngine;
@@ -38,199 +37,7 @@ public class HeliumHelperMod : BloonsTD6Mod
 
     public static float AutoSendSpeed = 2;
 
-    #region Common Methods and Patches
-    public static void BefriendBloon(string id, bool updateMenu = false)
-    {
-        WendellBloons.TryAdd(id, 0);
-        WendellBloons[id] += 1;
 
-        if (WendellBloonsMenu.instance != null && updateMenu)
-        {
-            if (WendellBloonsMenu.instance.updateToken != null)
-            {
-                MelonCoroutines.Stop(WendellBloonsMenu.instance.updateToken);
-            }
-
-            WendellBloonsMenu.instance.updateToken = MelonCoroutines.Start(WendellBloonsMenu.instance.UpdateButtons());
-        }
-    }
-
-    [HarmonyPatch(typeof(TowerSelectionMenu), nameof(TowerSelectionMenu.SelectTower))]
-    static class TowerSelectionMenu_Open
-    {
-        [HarmonyPostfix]
-        static void Postfix(TowerSelectionMenu __instance, TowerToSimulation tower)
-        {
-            if (tower.tower.towerModel.baseId == ModContent.TowerID<Wendell>())
-            {
-                ModContent.GetInstance<Wendell>().OnSelect(tower.tower, __instance);
-            }
-            else
-            {
-                if (WendellBloonsButton.instance != null)
-                {
-                    WendellBloonsButton.instance.Close();
-                }
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(Bloon), nameof(Bloon.Damage))]
-    static class Bloon_Damage
-    {
-        [HarmonyPrefix]
-        static bool Prefix(Bloon __instance, ref float totalAmount, Projectile projectile, Tower tower, ref bool createEffect, ref bool distributeToChildren)
-        {
-            if (tower == null || projectile == null)
-            {
-                return true;
-            }
-
-            if (projectile.projectileModel.id == "Wendell_Befriend")
-            {
-                if (__instance.bloonModel.layerNumber <= projectile.projectileModel.GetDamageModel().damage && !__instance.bloonModel.isBoss)
-                {
-                    ModContent.GetInstance<Wendell>().OnBefriend(tower, __instance);
-                    totalAmount = 1999999999;
-                    createEffect = false;
-                    distributeToChildren = true;
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-    }
-
-    [HarmonyPatch(typeof(Ability), nameof(Ability.Activate))]
-    static class Ability_Cast
-    {
-        [HarmonyPostfix]
-        public static void Postfix(Ability __instance)
-        {
-            if(__instance.abilityModel.name == "AbilityModel_Treaty_Lvl10")
-            {
-                foreach(var bloon in InGame.instance.GetBloons())
-                {
-                    if(bloon.bloonModel.layerNumber <= 6)
-                    {
-                        ModContent.GetInstance<Wendell>().OnBefriend(__instance.tower, bloon);
-                        bloon.Damage(1999999999, null, true, true, false);
-                    }
-                }
-            }
-            else if (__instance.abilityModel.name == "AbilityModel_Treaty_Lvl20")
-            {
-                foreach (var bloon in InGame.instance.GetBloons())
-                {
-                    if (bloon.bloonModel.layerNumber <= 11)
-                    {
-                        ModContent.GetInstance<Wendell>().OnBefriend(__instance.tower, bloon);
-                        bloon.Damage(1999999999, null, true, true, false);
-                    }
-                }
-            }
-        }
-    }
-    #endregion
-    #region Hooks
-    public override void OnLateUpdate()
-    {
-        if (InGame.instance != null && InGame.instance.bridge != null && InGame.instance.GetTowers().Any(twr => twr.towerModel.baseId == ModContent.TowerID<Wendell>()))
-        {
-            if (WendellBloonsMenu.autoSendEnabled && WendellBloonsMenu.nextAutoSendTime <= Time.time && WendellBloons.Count > 0)
-            {
-                WendellBloonsMenu.nextAutoSendTime = Time.time + AutoSendSpeed;
-
-                List<BloonModel> bloons = [];
-
-                foreach (var id in WendellBloons.Keys)
-                {
-                    bloons.Add(Game.instance.model.bloonsByName[id]);
-                }
-
-                string bloon = bloons.OrderBy(bm => bm.danger).ToList()[bloons.Count - 1].id;
-
-                SpawnBloonButton.SpawnProjectile(bloon);
-
-                WendellBloons[bloon] -= 1;
-                if (WendellBloons[bloon] <= 0)
-                {
-                    WendellBloons.Remove(bloon);
-                }
-            }
-        }
-    }
-
-    public override void OnWeaponFire(Weapon weapon)
-    {
-        var tower = weapon.attack.tower;
-
-        var proj = weapon.weaponModel.projectile;
-
-        if (tower.towerModel.baseId == ModContent.TowerID<Wendell>())
-        {
-            if (proj.id == "Wendell_Befriend")
-            {
-                tower.GetUnityDisplayNode().animationComponent.SetTrigger("Befriend");
-            }
-        }
-    }
-
-    public override void OnTowerUpgraded(Tower tower, string upgradeName, TowerModel newBaseTowerModel)
-    {
-        if(tower.towerModel.baseId != ModContent.TowerID<Wendell>())
-        {
-            return;
-        }
-
-        int level = tower.towerModel.tiers[0];
-
-        if (level == 16)
-        {
-            WhitelistedBloons.Add("Ddt");
-        }
-        if (level >= 5)
-        {
-            AutoSend = true;
-            AutoSendSpeed = 2;
-        }
-        if (level >= 13)
-        {
-            AutoSendSpeed = 1;
-        }
-        if (level >= 17)
-        {
-            AutoSendSpeed = .5f;
-        }
-        if (level >= 20)
-        {
-            AutoSendSpeed = .1f;
-        }
-    }
-
-    public override void OnMatchEnd()
-    {
-        WendellBloons.Clear();
-        WhitelistedBloons.Clear();
-        AutoSend = false;
-        AutoSendSpeed = 2;
-        WendellBloonsMenu.autoSendEnabled = false;
-    }
-
-    public override void OnRestart()
-    {
-        WendellBloons.Clear();
-        WhitelistedBloons.Clear();
-        AutoSend = false;
-        AutoSendSpeed = 2;
-        WendellBloonsMenu.autoSendEnabled = false;
-    }
-    #endregion
 
     #region Saving
     public const string WendellBloonsID = "WendellBloons";
@@ -283,4 +90,190 @@ public class HeliumHelperMod : BloonsTD6Mod
         }
     }
     #endregion
+    #region Hooks
+    public override void OnLateUpdate()
+    {
+        if (InGame.instance != null && InGame.instance.bridge != null && InGame.instance.GetTowers().Any(twr => twr.towerModel.baseId == ModContent.TowerID<Wendell>()))
+        {
+            if (WendellBloonsMenu.autoSendEnabled && WendellBloonsMenu.nextAutoSendTime <= Time.time && WendellBloons.Count > 0)
+            {
+                WendellBloonsMenu.nextAutoSendTime = Time.time + AutoSendSpeed;
+
+                List<BloonModel> bloons = [];
+
+                foreach (var id in WendellBloons.Keys)
+                {
+                    bloons.Add(Game.instance.model.bloonsByName[id]);
+                }
+
+                string bloon = bloons.OrderBy(bm => bm.danger).ToList()[bloons.Count - 1].id;
+
+                SpawnBloonButton.SpawnProjectile(bloon);
+
+                WendellBloons[bloon] -= 1;
+                if (WendellBloons[bloon] <= 0)
+                {
+                    WendellBloons.Remove(bloon);
+                }
+            }
+        }
+    }
+
+    public override void OnWeaponFire(Weapon weapon)
+    {
+        var tower = weapon.attack.tower;
+
+        var proj = weapon.weaponModel.projectile;
+
+        if (tower.towerModel.baseId == ModContent.TowerID<Wendell>())
+        {
+            if (proj.id == "Wendell_Befriend")
+            {
+                tower.GetUnityDisplayNode().animationComponent.SetTrigger("Befriend");
+            }
+        }
+    }
+
+    public override void OnTowerUpgraded(Tower tower, string upgradeName, TowerModel newBaseTowerModel)
+    {
+        if (tower.towerModel.baseId != ModContent.TowerID<Wendell>())
+        {
+            return;
+        }
+
+        int level = tower.towerModel.tiers[0];
+
+        if (level == 16)
+        {
+            WhitelistedBloons.Add("Ddt");
+        }
+        if (level >= 5)
+        {
+            AutoSend = true;
+            AutoSendSpeed = 2;
+        }
+        if (level >= 13)
+        {
+            AutoSendSpeed = 1;
+        }
+        if (level >= 17)
+        {
+            AutoSendSpeed = .5f;
+        }
+        if (level >= 20)
+        {
+            AutoSendSpeed = .1f;
+        }
+    }
+
+    public override void OnMatchEnd()
+    {
+        WendellBloons.Clear();
+        WhitelistedBloons.Clear();
+        AutoSend = false;
+        AutoSendSpeed = 2;
+        WendellBloonsMenu.autoSendEnabled = false;
+    }
+
+    public override void OnRestart()
+    {
+        WendellBloons.Clear();
+        WhitelistedBloons.Clear();
+        AutoSend = false;
+        AutoSendSpeed = 2;
+        WendellBloonsMenu.autoSendEnabled = false;
+    }
+    #endregion
+    #region Common Methods and Patches
+    public static void BefriendBloon(string id, bool updateMenu = false)
+    {
+        WendellBloons.TryAdd(id, 0);
+        WendellBloons[id] += 1;
+
+        if (WendellBloonsMenu.instance != null && updateMenu)
+        {
+            if (WendellBloonsMenu.instance.updateToken != null)
+            {
+                MelonCoroutines.Stop(WendellBloonsMenu.instance.updateToken);
+            }
+
+            WendellBloonsMenu.instance.updateToken = MelonCoroutines.Start(WendellBloonsMenu.instance.UpdateButtons());
+        }
+    }
+
+    [HarmonyPatch(typeof(TowerSelectionMenu), nameof(TowerSelectionMenu.SelectTower))]
+    static class TowerSelectionMenu_Open
+    {
+        [HarmonyPostfix]
+        static void Postfix(TowerSelectionMenu __instance, TowerToSimulation tower)
+        {
+            if (tower.tower.towerModel.baseId == ModContent.TowerID<Wendell>())
+            {
+                ModContent.GetInstance<Wendell>().OnSelect(tower.tower, __instance);
+            }
+            else
+            {
+                if (WendellBloonsButton.instance != null)
+                {
+                    WendellBloonsButton.instance.Close();
+                }
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Bloon), nameof(Bloon.PreCheckDamageOutcome))]
+    static class Bloon_PreCheckDamageOutcome
+    {
+        static void Postfix(Bloon __instance, Projectile projectile, Tower tower, ref Il2CppSystem.ValueTuple<bool, bool, bool> __result, float damageAmount)
+        {
+            if (tower == null || projectile == null)
+            {
+                return;
+            }
+
+            if (projectile.projectileModel.id == "Wendell_Befriend")
+            {
+                if (__instance.bloonModel.layerNumber <= projectile.projectileModel.GetDamageModel().damage && !__instance.bloonModel.isBoss)
+                {
+                    ModHelper.Log<HeliumHelperMod>("Befriend");
+                    ModContent.GetInstance<Wendell>().OnBefriend(tower, __instance);
+                    __instance.health -= 50000000;
+                }
+
+                __instance.health += (int)damageAmount;
+            }
+        }
+
+        [HarmonyPatch(typeof(Ability), nameof(Ability.Activate))]
+        static class Ability_Cast
+        {
+            [HarmonyPostfix]
+            public static void Postfix(Ability __instance)
+            {
+                if (__instance.abilityModel.name == "AbilityModel_Treaty_Lvl10")
+                {
+                    foreach (var bloon in InGame.instance.GetBloons())
+                    {
+                        if (bloon.bloonModel.layerNumber <= 6)
+                        {
+                            ModContent.GetInstance<Wendell>().OnBefriend(__instance.tower, bloon);
+                            bloon.Damage(1999999999, null, true, true, false);
+                        }
+                    }
+                }
+                else if (__instance.abilityModel.name == "AbilityModel_Treaty_Lvl20")
+                {
+                    foreach (var bloon in InGame.instance.GetBloons())
+                    {
+                        if (bloon.bloonModel.layerNumber <= 11)
+                        {
+                            ModContent.GetInstance<Wendell>().OnBefriend(__instance.tower, bloon);
+                            bloon.Damage(1999999999, null, true, true, false);
+                        }
+                    }
+                }
+            }
+        }
+        #endregion
+    }
 }

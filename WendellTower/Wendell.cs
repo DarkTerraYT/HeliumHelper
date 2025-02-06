@@ -64,6 +64,7 @@ namespace HeliumHelper.WendellTower
 
             proj.GetDamageModel().damage = 3;
             proj.GetDamageModel().maxDamage = 3;
+            proj.GetDamageModel().immuneBloonProperties = Il2Cpp.BloonProperties.None;
             proj.id = "Wendell_Befriend";
 
             proj.display = new("");

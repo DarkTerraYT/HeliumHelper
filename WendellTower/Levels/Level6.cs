@@ -1,5 +1,9 @@
 ﻿using BTD_Mod_Helper.Extensions;
+using Il2CppAssets.Scripts.Models.Bloons.Behaviors;
 using Il2CppAssets.Scripts.Models.Towers;
+using Il2CppAssets.Scripts.Simulation.Bloons.Behaviors;
+using Il2CppAssets.Scripts.Simulation.Props;
+using Il2CppAssets.Scripts.Unity.Bridge;
 using System;
 using System.Collections.Generic;
 using System.Linq;
