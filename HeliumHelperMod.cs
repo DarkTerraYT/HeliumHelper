@@ -31,13 +31,10 @@ namespace HeliumHelper;
 
 public class HeliumHelperMod : BloonsTD6Mod
 {
-    public static List<string> WhitelistedBloons = [];
 
     public static bool AutoSend = true;
 
     public static float AutoSendSpeed = 2;
-
-
 
     #region Saving
     public const string WendellBloonsID = "WendellBloons";
@@ -143,10 +140,6 @@ public class HeliumHelperMod : BloonsTD6Mod
 
         int level = tower.towerModel.tiers[0];
 
-        if (level == 16)
-        {
-            WhitelistedBloons.Add("Ddt");
-        }
         if (level >= 5)
         {
             AutoSend = true;
@@ -169,7 +162,6 @@ public class HeliumHelperMod : BloonsTD6Mod
     public override void OnMatchEnd()
     {
         WendellBloons.Clear();
-        WhitelistedBloons.Clear();
         AutoSend = false;
         AutoSendSpeed = 2;
         WendellBloonsMenu.autoSendEnabled = false;
@@ -178,7 +170,6 @@ public class HeliumHelperMod : BloonsTD6Mod
     public override void OnRestart()
     {
         WendellBloons.Clear();
-        WhitelistedBloons.Clear();
         AutoSend = false;
         AutoSendSpeed = 2;
         WendellBloonsMenu.autoSendEnabled = false;

@@ -8,6 +8,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Il2CppAssets.Scripts.Models;
+using Il2CppAssets.Scripts.Models.Towers.Behaviors.Attack;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 
 namespace HeliumHelper.WendellTower.Levels
 {
@@ -19,11 +22,11 @@ namespace HeliumHelper.WendellTower.Levels
 
         public override string Description => $"Ability, {AbilityDescription}";
 
-
+        // What is this java ahh method
         AbilityModel abilityModel()
         {
             AbilityModel ability = Game.instance.model.GetTowerFromId("MortarMonkey-040").GetAbility().Duplicate();
-            ability.behaviors = null;
+            ability.behaviors = new Il2CppReferenceArray<Model>([new ActivateAttackModel("ActivateAttackModel", 0, true, new Il2CppReferenceArray<AttackModel>(([])), false, false, true, true, true, false)]);
 
             ability.cooldown = 75;
 

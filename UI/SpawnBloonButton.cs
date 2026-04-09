@@ -136,11 +136,14 @@ namespace HeliumHelper.UI
 
             model.display = bloonModel.display;
 
+            model.AddBehavior(new ClearHitBloonsModel("ClearHitBloonsModel", 0.25f));
+            
             model.RemoveBehavior<TravelStraitModel>();
             AgeModel ageModel = new("AgeModel_", 999999, 0, false, null);
             model.AddBehavior(ageModel);
 
-            TrackTargetOrOrbitTowerModel trackTargetOrOrbitTowerModel = new("TrackTargetOrOrbitTowerModel_", 0, 0, bloonModel.speed / 10, bloonModel.speed / 10, bloonModel.speed / 10 * accelerationRate, 360 * turnRate, 360, bloonModel.speed / 15, 10 + bloonModel.radius * 1.25f, 0.01f, 1, null);
+            TrackTargetOrOrbitTowerModel trackTargetOrOrbitTowerModel = new("TrackTargetOrOrbitTowerModel_", 0, 0, bloonModel.speed / 10, bloonModel.speed / 10,
+                bloonModel.speed / 10 * accelerationRate, 360 * turnRate, 360, bloonModel.speed / 15, 10 + bloonModel.radius * 1.25f, 0.01f, 1, null);
             model.AddBehavior(trackTargetOrOrbitTowerModel);
 
             model.radius = Game.instance.model.bloonsByName[bloon].radius;
@@ -173,6 +176,8 @@ namespace HeliumHelper.UI
             proj.Position.Z = point.z + 5;
             proj.emittedFrom = point;
             proj.emittedBy = tower;
+            proj.ParentId = tower.Id;
+            proj.SetParentTowerSet();
 
             proj.GetProjectileBehavior<TrackTargetOrOrbitTower>().OrbitTower();
         }

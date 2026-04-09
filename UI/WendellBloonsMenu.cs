@@ -14,8 +14,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using BTD_Mod_Helper;
 using UnityEngine;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace HeliumHelper.UI
 {
@@ -140,7 +142,7 @@ namespace HeliumHelper.UI
             instance = mainPanel.AddComponent<WendellBloonsMenu>();
             instance.mainPanel = mainPanel;
 
-            instance.tsm = TowerSelectionMenu.instance;
+            instance.tsm = FindAnyObjectByType<TowerSelectionMenu>();
 
             var matchLocalPosition = instance.mainPanel.AddComponent<MatchLocalPosition>();
             matchLocalPosition.transformToCopy = instance.tsm.transform;
@@ -183,7 +185,7 @@ namespace HeliumHelper.UI
 
             var addAllBloons = instance.mainPanel.AddButton(new("AddAllBloonsBtn", -740, 575, 150), VanillaSprites.AddMoreBtn, new Action(() => 
             {
-                foreach(var id in InGame.instance.GetGameModel().bloonsByName.Keys)
+                foreach(var id in InGame.instance.GetGameModel().bloonsByName._keys)
                 {
                     HeliumHelperMod.WendellBloons.TryAdd(id, 0);
                     HeliumHelperMod.WendellBloons[id] += 1;

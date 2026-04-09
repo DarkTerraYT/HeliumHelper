@@ -1,1 +1,1 @@
-Release of the mod jam version of this mod
+Fix for latest version + Summoned bloons can hit each bloon more than once.
